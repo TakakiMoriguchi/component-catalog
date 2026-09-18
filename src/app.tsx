@@ -1,37 +1,33 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Button } from "@/components/Button";
 import { AppProviders } from "@/providers";
 
 // カタログの対になる「本体アプリ」。catalog.html とはエントリが分かれている。
 // 中身は components/ の使用例を置くだけのプレースホルダー。
 function App() {
-  const [open, setOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [count, setCount] = useState(0);
 
-  const handleConfirm = () => {
-    setSubmitting(true);
+  const handleClick = () => {
+    setLoading(true);
     setTimeout(() => {
-      setSubmitting(false);
-      setOpen(false);
+      setLoading(false);
+      setCount((n) => n + 1);
     }, 1500);
   };
 
   return (
-    <div style={{ padding: 32 }}>
-      <button type="button" onClick={() => setOpen(true)}>
-        ダイアログを開く
-      </button>
-      <ConfirmDialog
-        open={open}
-        title="この操作を実行しますか？"
-        description="実行後は元に戻せません。"
-        submitting={submitting}
-        submittingLabel="実行中..."
-        confirmLabel="実行する"
-        onClose={() => setOpen(false)}
-        onConfirm={handleConfirm}
-      />
+    <div style={{ padding: 32, display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ display: "flex", gap: 8 }}>
+        <Button loading={loading} loadingLabel="保存中..." onClick={handleClick}>
+          保存する
+        </Button>
+        <Button variant="secondary" onClick={() => setCount(0)}>
+          リセット
+        </Button>
+      </div>
+      <p>保存した回数: {count}</p>
     </div>
   );
 }

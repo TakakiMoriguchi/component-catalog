@@ -1,12 +1,12 @@
 import type { ReactElement } from "react";
 import { createRoot } from "react-dom/client";
-import confirmDialog from "@/components/ConfirmDialog.fixture";
+import button from "@/components/Button.fixture";
 import { AppProviders } from "@/providers";
 
 // fixture の登録リスト。`*.fixture.tsx` を足したらここに 1 行追加する
 // (Bun に import.meta.glob が無く自動収集できないため手動)。
 const FIXTURES: Record<string, Record<string, ReactElement>> = {
-  ConfirmDialog: confirmDialog,
+  Button: button,
 };
 
 function fixtureUrl(component: string, fixture: string): string {

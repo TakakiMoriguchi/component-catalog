@@ -46,9 +46,9 @@ component-catalog/
     ├── catalog.tsx          # カタログ (fixture の登録リスト・選択・一覧)
     ├── providers.tsx        # カタログと本体アプリで共有するラッパー
     └── components/
-        ├── ConfirmDialog.tsx          # 対象コンポーネント (汎用の確認ダイアログ)
-        ├── ConfirmDialog.fixture.tsx  # カタログ用の表示パターン
-        └── ConfirmDialog.test.tsx     # 単体テスト
+        ├── Button.tsx          # 対象コンポーネント (汎用のボタン)
+        ├── Button.fixture.tsx  # カタログ用の表示パターン
+        └── Button.test.tsx     # 単体テスト
 ```
 
 fixture とテストは対象コンポーネントと同じディレクトリに置きます（コロケーション）。
@@ -78,8 +78,8 @@ Storybook / react-cosmos / Ladle は、いずれもバンドラーとして vite
 
 ```tsx
 export default {
-  デフォルト: <ConfirmDialog open title={TITLE} description={DESCRIPTION} onClose={noop} onConfirm={noop} />,
-  処理中: <ConfirmDialog open title={TITLE} submitting submittingLabel="実行中..." onClose={noop} onConfirm={noop} />,
+  デフォルト: <Button onClick={noop}>保存する</Button>,
+  処理中: <Button loading loadingLabel="保存中..." onClick={noop}>保存する</Button>,
 };
 ```
 
@@ -89,9 +89,9 @@ Storybook / Ladle の CSF（`export const 送信中 = { args: { ... } }`）は�
 
 ### UI ライブラリに依存しない
 
-サンプルの `ConfirmDialog` は素の DOM と inline style だけで書いてあります。この構成は特定の UI ライブラリに依存しません。
+サンプルの `Button` は素の DOM と inline style だけで書いてあります。この構成は特定の UI ライブラリに依存しません。
 
-`ConfirmDialog` 自体もドメインを持たない汎用コンポーネントです。見出し・本文・ボタン文言はすべて props で渡し、既定値以外の文言はコンポーネントに埋め込みません。
+`Button` 自体もドメインを持たない汎用コンポーネントです。文言は children と props で渡し、`button` 要素の属性はそのまま透過させます。
 
 実アプリでは、カタログと本体アプリの両方を同じ Provider（テーマ、ロケールなど）でラップしてください。カタログだけラップし忘れると、見た目が本体とずれます。このサンプルでは `src/providers.tsx` がその位置づけです。
 
