@@ -1,0 +1,27 @@
+{
+  "name": "component-catalog",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "catalog": "BUN_PUBLIC_USE_CATALOG=true bun --hot src/index.ts",
+    "test": "bun test --preload ./happydom.ts src/",
+    "build": "NODE_ENV=production bun build ./src/index.html --outdir=dist --target=browser --minify",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "@happy-dom/global-registrator": "^20",
+    "@testing-library/jest-dom": "^7",
+    "@testing-library/react": "^16",
+    "@testing-library/user-event": "^14",
+    "@types/bun": "latest",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  }
+}

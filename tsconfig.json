@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM"],
+    "target": "ESNext",
+    "module": "Preserve",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["bun", "react", "react-dom"],
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] }
+  },
+  // happydom.ts は bun test の preload 専用。@testing-library/jest-dom の types エントリが
+  // module ではないため tsc が解決できない。実行時のみ使うので型検査の対象外にする。
+  "exclude": ["dist", "node_modules", "happydom.ts"]
+}
