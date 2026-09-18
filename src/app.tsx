@@ -4,6 +4,7 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AppProviders } from "@/providers";
 
 // カタログの対になる「本体アプリ」。catalog.html とはエントリが分かれている。
+// 中身は components/ の使用例を置くだけのプレースホルダー。
 function App() {
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -19,12 +20,15 @@ function App() {
   return (
     <div style={{ padding: 32 }}>
       <button type="button" onClick={() => setOpen(true)}>
-        招待メールを再送
+        ダイアログを開く
       </button>
       <ConfirmDialog
         open={open}
-        email="pending@example.com"
+        title="この操作を実行しますか？"
+        description="実行後は元に戻せません。"
         submitting={submitting}
+        submittingLabel="実行中..."
+        confirmLabel="実行する"
         onClose={() => setOpen(false)}
         onConfirm={handleConfirm}
       />

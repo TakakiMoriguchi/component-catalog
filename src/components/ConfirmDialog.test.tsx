@@ -9,16 +9,23 @@ import fixtures from "./ConfirmDialog.fixture";
 afterEach(cleanup);
 
 const noop = () => {};
-const EMAIL = "pending@example.com";
+const TITLE = "この操作を実行しますか？";
 
 describe("ConfirmDialog", () => {
-  test("ボタン連打: 送信中は両ボタンが disabled になり onConfirm が呼ばれない", async () => {
+  test("ボタン連打: 処理中は両ボタンが disabled になり onConfirm が呼ばれない", async () => {
     const onConfirm = mock(noop);
     render(
-      <ConfirmDialog open email={EMAIL} submitting onClose={noop} onConfirm={onConfirm} />,
+      <ConfirmDialog
+        open
+        title={TITLE}
+        submitting
+        submittingLabel="実行中..."
+        onClose={noop}
+        onConfirm={onConfirm}
+      />,
     );
 
-    const confirm = screen.getByRole("button", { name: "再送中..." });
+    const confirm = screen.getByRole("button", { name: "実行中..." });
     expect(confirm).toBeDisabled();
     expect(screen.getByRole("button", { name: "キャンセル" })).toBeDisabled();
 
@@ -33,13 +40,7 @@ describe("ConfirmDialog", () => {
     const onClose = mock(noop);
     const onConfirm = mock(noop);
     render(
-      <ConfirmDialog
-        open
-        email={EMAIL}
-        submitting={false}
-        onClose={onClose}
-        onConfirm={onConfirm}
-      />,
+      <ConfirmDialog open title={TITLE} onClose={onClose} onConfirm={onConfirm} />,
     );
 
     await userEvent.click(screen.getByRole("button", { name: "キャンセル" }));
@@ -49,17 +50,15 @@ describe("ConfirmDialog", () => {
 
   test("ESC でダイアログが閉じる", async () => {
     const onClose = mock(noop);
-    render(
-      <ConfirmDialog open email={EMAIL} submitting={false} onClose={onClose} onConfirm={noop} />,
-    );
+    render(<ConfirmDialog open title={TITLE} onClose={onClose} onConfirm={noop} />);
 
     await userEvent.keyboard("{Escape}");
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  test("送信中は ESC でダイアログが閉じない", async () => {
+  test("処理中は ESC でダイアログが閉じない", async () => {
     const onClose = mock(noop);
-    render(<ConfirmDialog open email={EMAIL} submitting onClose={onClose} onConfirm={noop} />);
+    render(<ConfirmDialog open title={TITLE} submitting onClose={onClose} onConfirm={noop} />);
 
     await userEvent.keyboard("{Escape}");
     expect(onClose).not.toHaveBeenCalled();
@@ -69,21 +68,39 @@ describe("ConfirmDialog", () => {
     render(
       <ConfirmDialog
         open
-        email={EMAIL}
-        submitting={false}
-        errorMessage="再送に失敗しました"
+        title={TITLE}
+        errorMessage="処理に失敗しました"
         onClose={noop}
         onConfirm={noop}
       />,
     );
 
-    expect(screen.getByRole("alert")).toHaveTextContent("再送に失敗しました");
+    expect(screen.getByRole("alert")).toHaveTextContent("処理に失敗しました");
   });
 
-  test("宛先未指定: フォールバックの文言になる", () => {
-    render(<ConfirmDialog open submitting={false} onClose={noop} onConfirm={noop} />);
+  test("文言は props で差し替えられる", () => {
+    render(
+      <ConfirmDialog
+        open
+        title={TITLE}
+        description="実行後は元に戻せません。"
+        confirmLabel="削除する"
+        cancelLabel="やめる"
+        onClose={noop}
+        onConfirm={noop}
+      />,
+    );
 
-    expect(screen.getByText("招待メールを再送します。")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: TITLE })).toBeInTheDocument();
+    expect(screen.getByText("実行後は元に戻せません。")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "削除する" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "やめる" })).toBeInTheDocument();
+  });
+
+  test("description 未指定: aria-describedby を付けない", () => {
+    render(<ConfirmDialog open title={TITLE} onClose={noop} onConfirm={noop} />);
+
+    expect(screen.getByRole("dialog")).not.toHaveAttribute("aria-describedby");
   });
 });
 
@@ -91,6 +108,6 @@ describe("fixture", () => {
   // カタログに載せている fixture が全部描画できることのスモークテスト。
   test.each(Object.entries(fixtures))("%s が描画できる", (_name, element) => {
     render(element);
-    expect(screen.getByRole("heading", { name: "招待メールを再送" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 });

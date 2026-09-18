@@ -1,29 +1,44 @@
-import { useEffect } from "react";
-
-const TITLE_ID = "confirm-dialog-title";
+import { useEffect, useId } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 export interface ConfirmDialogProps {
   open: boolean;
-  /** 宛先メールアドレス。未指定なら宛先を伏せた文言にする。 */
-  email?: string;
-  /** 送信中かどうか。閉じる操作と確定操作を無効化して二重送信を防ぐ。 */
-  submitting: boolean;
-  /** 表示するサーバーエラー。未指定 / null なら出さない。 */
+  /** 見出し。ダイアログのアクセシブル名になる。 */
+  title: string;
+  /** 本文。未指定なら本文行を出さない。 */
+  description?: ReactNode;
+  /** 処理中かどうか。閉じる操作と確定操作を無効化して二重実行を防ぐ。 */
+  submitting?: boolean;
+  /** 表示するエラー。未指定 / null なら出さない。 */
   errorMessage?: string | null;
+  /** 確定ボタンの文言。 */
+  confirmLabel?: string;
+  /** 取消ボタンの文言。 */
+  cancelLabel?: string;
+  /** submitting 中の確定ボタン文言。未指定なら confirmLabel のまま。 */
+  submittingLabel?: string;
   onClose: () => void;
   onConfirm: () => void;
 }
 
-/** 招待メール再送の確認ダイアログ (表示のみ)。 */
+/** 汎用の確認ダイアログ (表示のみ)。文言はすべて props で差し替える。 */
 export function ConfirmDialog({
   open,
-  email,
-  submitting,
+  title,
+  description,
+  submitting = false,
   errorMessage,
+  confirmLabel = "OK",
+  cancelLabel = "キャンセル",
+  submittingLabel,
   onClose,
   onConfirm,
 }: ConfirmDialogProps) {
-  // 送信中の意図しない close (backdrop click / ESC) を抑止する。
+  // 同一ページに複数個置いても id が衝突しないようにする。
+  const titleId = useId();
+  const descriptionId = useId();
+
+  // 処理中の意図しない close (backdrop click / ESC) を抑止する。
   const handleClose = () => {
     if (submitting) return;
     onClose();
@@ -32,11 +47,11 @@ export function ConfirmDialog({
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
+      if (e.key === "Escape" && !submitting) onClose();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  });
+  }, [open, submitting, onClose]);
 
   if (!open) return null;
 
@@ -46,27 +61,30 @@ export function ConfirmDialog({
       <div
         role="dialog"
         aria-modal="true"
-        aria-labelledby={TITLE_ID}
+        aria-labelledby={titleId}
+        aria-describedby={description ? descriptionId : undefined}
         style={styles.dialog}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id={TITLE_ID} style={styles.title}>
-          招待メールを再送
+        <h2 id={titleId} style={styles.title}>
+          {title}
         </h2>
         {errorMessage && (
           <p role="alert" style={styles.alert}>
             {errorMessage}
           </p>
         )}
-        <p style={styles.body}>
-          {email ? `「${email}」宛に招待メールを再送します。` : "招待メールを再送します。"}
-        </p>
+        {description && (
+          <p id={descriptionId} style={styles.body}>
+            {description}
+          </p>
+        )}
         <div style={styles.actions}>
           <button type="button" onClick={handleClose} disabled={submitting}>
-            キャンセル
+            {cancelLabel}
           </button>
           <button type="button" onClick={onConfirm} disabled={submitting}>
-            {submitting ? "再送中..." : "再送する"}
+            {submitting ? (submittingLabel ?? confirmLabel) : confirmLabel}
           </button>
         </div>
       </div>
@@ -88,4 +106,4 @@ const styles = {
   alert: { margin: "0 0 12px", padding: "8px 12px", borderRadius: 4, background: "#fdecea" },
   body: { margin: "0 0 20px" },
   actions: { display: "flex", gap: 8, justifyContent: "flex-end" },
-} satisfies Record<string, React.CSSProperties>;
+} satisfies Record<string, CSSProperties>;
